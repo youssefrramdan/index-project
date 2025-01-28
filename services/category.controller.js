@@ -23,8 +23,9 @@ const getAllCategories = asyncHandler(async (req, res) => {
 // @desc     Get Specific Category by id
 // @route    GET /api/v1/categories/:id
 // @access   Public
+
 const getSpecificCategory = asyncHandler(async (req, res, next) => {
-  const Categoryid = req.params.id;
+  const Categoryid = req.validData.id;
   const category = await CategoryModel.findById(Categoryid);
   if (!category) {
     return next(new ApiError(`No category for this id ${Categoryid}`, 404));
@@ -38,8 +39,9 @@ const getSpecificCategory = asyncHandler(async (req, res, next) => {
 // @desc     Create category
 // @route    POST /api/v1/categories
 // @access   Private
+
 const addCategory = asyncHandler(async (req, res, next) => {
-  const name = req.body.name;
+  const name = req.validData.name;
   if (!name) {
     return next(new ApiError("Category name is required", 404));
   }
@@ -56,8 +58,8 @@ const addCategory = asyncHandler(async (req, res, next) => {
 // @access   Private
 
 const updateCategory = asyncHandler(async (req, res, next) => {
-  const Categoryid = req.params.id;
-  const { name } = req.body;
+  const Categoryid = req.validData.id;
+  const { name } = req.validData;
 
   const category = await CategoryModel.findByIdAndUpdate(
     { _id: Categoryid },
@@ -77,8 +79,7 @@ const updateCategory = asyncHandler(async (req, res, next) => {
 // @route    DELETE /api/v1/categories/id
 // @access   Private
 const deleteCategory = asyncHandler(async (req, res, next) => {
-  const Categoryid = req.params.id;
-  const { name } = req.body;
+  const Categoryid = req.validData.id;
   const category = await CategoryModel.findByIdAndDelete(Categoryid);
   if (!category) {
     return next(new ApiError(`No category for this id ${Categoryid}`, 404));
@@ -122,6 +123,7 @@ export {
 
 //   } catch (error) {
 //     res.status(500).json({ message: error.message });
+//     //next(error);
 //   }
 // };
 // ---------------------------------------------------------------------------------------------

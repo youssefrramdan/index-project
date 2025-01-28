@@ -28,6 +28,12 @@ app.all("*", (req, res, next) => {
 // Global error handling middleware for express
 app.use(globalError);
 
+// Handling Sync Errors and Unhandled Rejections in Node.js (Outside Express)
+// When working with Express.js and Node.js, 
+// not all errors are caught inside Express middleware.
+//  Some errors occur at the system level (like unhandled promise rejections or synchronous exceptions).
+//  You need to listen for these errors globally using Node.js process events.
+
 // listen any regication outside express
 // Events =>listen event => return callback(err)
 process.on("unhandledRejection", (err) => {
@@ -37,6 +43,16 @@ process.on("unhandledRejection", (err) => {
     process.exit(1);
   });
 });
+// What about errors that happen synchronously outside Express?
+// For example, if an error occurs before Express starts,
+//  it won't be caught by Express error handling middleware.
+
+process.on("uncaughtException", (err) => {
+  console.error(`Uncaught Exception: ${err.name} | ${err.message}`);
+  // Gracefully shutting down
+  process.exit(1); // Exit immediately with failure code
+});
+
 
 const PORT = process.env.PORT || 3000;
 const server = app.listen(PORT, () => {
