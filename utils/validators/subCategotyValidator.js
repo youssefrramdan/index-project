@@ -13,7 +13,7 @@ export const addSubCategoryValidator = [
     .notEmpty()
     .withMessage("Category required")
     .isMongoId()
-    .withMessage("Invalid subCategory Id Format"),
+    .withMessage("Invalid Category Id Format"),
   validatorMiddleware,
 ];
 

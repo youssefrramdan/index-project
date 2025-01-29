@@ -1,10 +1,13 @@
 import express from "express";
 import {
   addSubCategory,
+  createFilterObj,
   deleteSubCategory,
   getAllSubCategories,
   getSpecificSubCategory,
+  setCategoryIdToBody,
   updateSubCategory,
+  validateCategory,
 } from "../services/subCategory.controller.js";
 import {
   addSubCategoryValidator,
@@ -12,17 +15,22 @@ import {
   getSpecificSubCategoryValidator,
   updateSubCategoryValidator,
 } from "../utils/validators/subCategotyValidator.js";
-
-const subCategoriesRouter = express.Router();
-
+// mergeParams : Allow us to access parameters on other Routers
+const subCategoriesRouter = express.Router({ mergeParams: true });
+// example : we need to access categoryId from category Router
 subCategoriesRouter
   .route("/")
-  .post(addSubCategoryValidator, addSubCategory)
-  .get(getAllSubCategories);
+  .post(
+    setCategoryIdToBody,
+    validateCategory,
+    addSubCategoryValidator,
+    addSubCategory
+  )
+  .get(createFilterObj, getAllSubCategories);
 subCategoriesRouter
   .route("/:id")
   .get(getSpecificSubCategoryValidator, getSpecificSubCategory)
-  .put(updateSubCategoryValidator,updateSubCategory)
-  .delete(deleteSubCategoryValidator,deleteSubCategory);
+  .put(updateSubCategoryValidator, updateSubCategory)
+  .delete(deleteSubCategoryValidator, deleteSubCategory);
 
 export default subCategoriesRouter;
