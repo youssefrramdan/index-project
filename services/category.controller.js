@@ -1,7 +1,24 @@
 import slugify from "slugify";
-import CategoryModel from "../models/category.model.js";
 import asyncHandler from "express-async-handler";
 import { ApiError } from "../utils/apiError.js";
+import CategoryModel from "../models/Category.model.js";
+
+// @desc     Create category
+// @route    POST /api/v1/categories
+// @access   Private
+
+const addCategory = asyncHandler(async (req, res, next) => {
+  const {name} = req.validData;
+  if (!name) {
+    return next(new ApiError("Category name is required", 404));
+  }
+  const category = await CategoryModel.create({ name, slug: slugify(name) });
+  // for follfilled (success)
+  res.status(201).json({
+    message: "Category created successfully",
+    data: category,
+  });
+});
 
 // @desc     Get list of categories
 // @route    Get /api/v1/categories
@@ -32,23 +49,6 @@ const getSpecificCategory = asyncHandler(async (req, res, next) => {
   }
   res.status(200).json({
     message: "success",
-    data: category,
-  });
-});
-
-// @desc     Create category
-// @route    POST /api/v1/categories
-// @access   Private
-
-const addCategory = asyncHandler(async (req, res, next) => {
-  const name = req.validData.name;
-  if (!name) {
-    return next(new ApiError("Category name is required", 404));
-  }
-  const category = await CategoryModel.create({ name, slug: slugify(name) });
-  // for follfilled (success)
-  res.status(201).json({
-    message: "Category created successfully",
     data: category,
   });
 });

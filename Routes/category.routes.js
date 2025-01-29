@@ -12,6 +12,7 @@ import {
   getSpecificCategoryValidator,
   updateCategoryValidator,
 } from "../utils/validators/categoryValidator.js";
+
 const categoryRouter = express.Router();
 
 categoryRouter
