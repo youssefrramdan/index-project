@@ -5,6 +5,8 @@ import dbConnection from "./config/database.js";
 import categoryRouter from "./Routes/category.routes.js";
 import { ApiError } from "./utils/apiError.js";
 import globalError from "./middlewares/errorMiddleware.js";
+import subCategoriesRouter from "./Routes/subCategory.routes.js";
+
 dotenv.config({ path: "./config.env" });
 
 //db connection
@@ -15,12 +17,14 @@ const app = express();
 
 // middlewares
 app.use(express.json());
-if (process.env.NODE_ENV == "development") {
+if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
+  console.log(`mode : ${process.env.NODE_ENV}`);
 }
 
 // mount Routes
 app.use("/api/v1/categories", categoryRouter);
+app.use("/api/v1/subcategories", subCategoriesRouter);
 app.all("*", (req, res, next) => {
   next(new ApiError(`Cant find this route ${req.originalUrl}`, 400));
 });
@@ -29,7 +33,7 @@ app.all("*", (req, res, next) => {
 app.use(globalError);
 
 // Handling Sync Errors and Unhandled Rejections in Node.js (Outside Express)
-// When working with Express.js and Node.js, 
+// When working with Express.js and Node.js,
 // not all errors are caught inside Express middleware.
 //  Some errors occur at the system level (like unhandled promise rejections or synchronous exceptions).
 //  You need to listen for these errors globally using Node.js process events.
@@ -38,6 +42,7 @@ app.use(globalError);
 // Events =>listen event => return callback(err)
 process.on("unhandledRejection", (err) => {
   console.error(`unhandledRejection Error : ${err.name} | ${err.message}`);
+  // eslint-disable-next-line no-use-before-define
   server.close(() => {
     console.error(`Shutting down ...`);
     process.exit(1);
@@ -52,7 +57,6 @@ process.on("uncaughtException", (err) => {
   // Gracefully shutting down
   process.exit(1); // Exit immediately with failure code
 });
-
 
 const PORT = process.env.PORT || 3000;
 const server = app.listen(PORT, () => {

@@ -7,19 +7,15 @@ const globalError = (err, req, res, next) => {
     sendErrorForProd(err, res);
   }
 };
-const sendErrorForDev = (err, res) => {
-  return res.status(400).json({
+const sendErrorForDev = (err, res) => res.status(400).json({
     status: err.status,
     Error: err,
     message: err.message,
     stack: err.stack,
   });
-};
 
-const sendErrorForProd = (err, res) => {
-  return res.status(400).json({
+const sendErrorForProd = (err, res) => res.status(400).json({
     status: err.status,
     message: err.message,
   });
-};
 export default globalError;
