@@ -1,3 +1,4 @@
+/* eslint-disable prefer-const */
 /* eslint-disable node/no-unsupported-features/es-syntax */
 class ApiFeatures {
   // Constructor initializes the query and request parameters
@@ -74,16 +75,21 @@ class ApiFeatures {
    * URL: /api/v1/products?keyword=iphone
    * This will return products where the title or description contains "iphone".
    */
-  search() {
+  search(model) {
     if (this.queryString.keyword) {
-      const searchQuery = {
-        $or: [
+      let searchQuery = {}; // Initialize searchQuery object
+      if (model === "Product") {
+        searchQuery.$or = [
           { title: { $regex: this.queryString.keyword, $options: "i" } }, // Case-insensitive search in title
           { description: { $regex: this.queryString.keyword, $options: "i" } }, // Case-insensitive search in description
-        ],
-      };
+        ];
+      } else {
+        searchQuery.$or = [
+          { name: { $regex: this.queryString.keyword, $options: "i" } }, // Case-insensitive search in title
+        ];
+      }
 
-      this.mongooseQuery = this.mongooseQuery.find({ ...searchQuery });
+      this.mongooseQuery = this.mongooseQuery.find(searchQuery);
     }
     return this;
   }
@@ -103,7 +109,7 @@ class ApiFeatures {
     const pagination = {};
     pagination.currentPage = page;
     pagination.resultsPerPage = limit;
-    pagination.totalPages = Math.ceil(countDocuments / limit);//
+    pagination.totalPages = Math.ceil(countDocuments / limit); //
     if (endIndex < countDocuments) {
       pagination.nextPage = page + 1;
     }

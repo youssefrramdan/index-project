@@ -2,6 +2,7 @@ import asyncHandler from "express-async-handler";
 import slugify from "slugify";
 import SubCategoryModel from "../models/SubCategory.model.js";
 import { ApiError } from "../utils/apiError.js";
+import ApiFeatures from "../utils/DummyData/apiFeatures.js";
 
 // @desc     Create SubCategory
 // @route    POST /api/v1/subcategories
@@ -32,21 +33,21 @@ export const createFilterObj = (req, res, next) => {
 // @route    GET /api/v1/subcategories
 // @access   Public
 const getAllSubCategories = asyncHandler(async (req, res) => {
-  const page = Number(req.query.page) || 1;
-  const limit = Number(req.query.limit) || 5;
-  const skip = (page - 1) * limit;
-  const subcategories = await SubCategoryModel.find(req.filterObj)
-    .skip(skip)
-    .limit(limit)
-    .populate({
-      path: "category",
-      select: "name",
-    });
-
+  const documentCount = await SubCategoryModel.countDocuments();
+  const Features = new ApiFeatures(
+    SubCategoryModel.find(req.filterObj),
+    req.query
+  )
+    .filter()
+    .search("SubCategory")
+    .sort()
+    .limitFields()
+    .paginate(documentCount);
+  const { paginationResult, mongooseQuery } = Features;
+  const subcategories = await mongooseQuery;
   res.status(200).json({
     message: "Success",
-    page,
-    limit,
+    paginationResult,
     result: subcategories.length,
     data: subcategories,
   });
@@ -119,10 +120,6 @@ export {
   // setCategoryIdToBody,
 };
 
-
-
-
-
 // // Middleware to validate category existence
 // export const validateCategory = asyncHandler(async (req, res, next) => {
 //   const checkCategory = await CategoryModel.findById(req.body.category);
@@ -133,9 +130,6 @@ export {
 //   }
 //   next();
 // });
-
-
-
 
 // // nested route
 // // Get /api/v1/categories/:category:id/subcategories

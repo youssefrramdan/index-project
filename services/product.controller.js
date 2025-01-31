@@ -10,16 +10,20 @@ import ApiFeatures from "../utils/DummyData/apiFeatures.js";
 // @route    GET /api/v1/products
 // @access   Public
 const getAllProduct = asyncHandler(async (req, res) => {
-  const documentCount = await ProductModel.countDocuments()
+  const documentCount = await ProductModel.countDocuments();
   const features = new ApiFeatures(ProductModel.find(), req.query)
     .filter()
-    .search()
+    .search("Product")
     .sort()
     .limitFields()
     .paginate(documentCount);
   const { mongooseQuery, paginationResult } = features;
 
-  const products = await mongooseQuery;
+  const products = await mongooseQuery.populate([
+    { path: "subcategories", select: "name -_id" }, 
+    { path: "category", select: "name -_id" },
+    { path: "brand", select: "name -_id" }, 
+  ]);
   // Response
   res.status(200).json({
     message: "success",
