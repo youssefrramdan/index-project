@@ -2,26 +2,6 @@ import asyncHandler from "express-async-handler";
 import slugify from "slugify";
 import SubCategoryModel from "../models/SubCategory.model.js";
 import { ApiError } from "../utils/apiError.js";
-import CategoryModel from "../models/Category.model.js";
-
-// nested route
-// Get /api/v1/categories/:category:id/subcategories
-// Middleware to set categoryId in the request body (if not provided)
-const setCategoryIdToBody = (req, res, next) => {
-  if (!req.body.category) req.body.category = req.params.categoryId;
-  next();
-};
-
-// Middleware to validate category existence
-export const validateCategory = asyncHandler(async (req, res, next) => {
-  const checkCategory = await CategoryModel.findById(req.body.category);
-  if (!checkCategory) {
-    return next(
-      new ApiError(`No category found for this ID: ${req.body.category}`, 400)
-    );
-  }
-  next();
-});
 
 // @desc     Create SubCategory
 // @route    POST /api/v1/subcategories
@@ -92,10 +72,6 @@ const getSpecificSubCategory = asyncHandler(async (req, res, next) => {
 // @route    PUT /api/v1/subcategories/:id
 // @access   Private
 const updateSubCategory = asyncHandler(async (req, res, next) => {
-  if (req.body.category) {
-    await validateCategory(req, res, next);
-  }
-
   const subCategory = await SubCategoryModel.findByIdAndUpdate(
     req.params.id,
     {
@@ -140,5 +116,31 @@ export {
   getSpecificSubCategory,
   updateSubCategory,
   deleteSubCategory,
-  setCategoryIdToBody,
+  // setCategoryIdToBody,
 };
+
+
+
+
+
+// // Middleware to validate category existence
+// export const validateCategory = asyncHandler(async (req, res, next) => {
+//   const checkCategory = await CategoryModel.findById(req.body.category);
+//   if (!checkCategory) {
+//     return next(
+//       new ApiError(`No category found for this ID: ${req.body.category}`, 400)
+//     );
+//   }
+//   next();
+// });
+
+
+
+
+// // nested route
+// // Get /api/v1/categories/:category:id/subcategories
+// // Middleware to set categoryId in the request body (if not provided)
+// const setCategoryIdToBody = (req, res, next) => {
+//   if (!req.body.category) req.body.category = req.params.categoryId;
+//   next();
+// };

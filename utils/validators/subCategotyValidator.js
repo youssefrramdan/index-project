@@ -1,5 +1,6 @@
 import { check } from "express-validator";
-import validatorMiddleware  from "../../middlewares/validatorMiddleware.js";
+import validatorMiddleware from "../../middlewares/validatorMiddleware.js";
+import CategoryModel from "../../models/Category.model.js";
 
 export const addSubCategoryValidator = [
   check("name")
@@ -9,11 +10,22 @@ export const addSubCategoryValidator = [
     .withMessage("Too short category name")
     .isLength({ max: 32 })
     .withMessage("Too long category name"),
-    check("category")
+  check("category")
+    .customSanitizer((value, { req }) => value || req.params.categoryId)
     .notEmpty()
-    .withMessage("Category required")
+    .withMessage("Subcategory must belong to a category")
     .isMongoId()
-    .withMessage("Invalid Category Id Format"),
+    .withMessage("Invalid ID format")
+    .custom((categoryId) =>
+      CategoryModel.findById(categoryId).then((category) => {
+        if (!category) {
+          return Promise.reject(
+            new Error(`No category found for this id: ${categoryId}`)
+          );
+        }
+      })
+    ),
+
   validatorMiddleware,
 ];
 
@@ -24,6 +36,19 @@ export const getSpecificSubCategoryValidator = [
 
 export const updateSubCategoryValidator = [
   check("id").isMongoId().withMessage("Invalid SubCategory Id Format"),
+  check("category")
+    .optional()
+    .isMongoId()
+    .withMessage("Invalid ID formate")
+    .custom((categoryId) =>
+      CategoryModel.findById(categoryId).then((category) => {
+        if (!category) {
+          return Promise.reject(
+            new Error(`No category for this id: ${categoryId}`)
+          );
+        }
+      })
+    ),
   validatorMiddleware,
 ];
 

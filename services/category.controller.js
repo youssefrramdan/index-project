@@ -8,7 +8,7 @@ import CategoryModel from "../models/Category.model.js";
 // @access   Private
 
 const addCategory = asyncHandler(async (req, res, next) => {
-  const {name} = req.validData;
+  const { name } = req.validData;
   if (!name) {
     return next(new ApiError("Category name is required", 404));
   }

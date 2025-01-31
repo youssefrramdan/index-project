@@ -7,4 +7,5 @@ class ApiError extends Error {
     this.isOperational = true;
   }
 }
+// eslint-disable-next-line import/prefer-default-export
 export { ApiError };

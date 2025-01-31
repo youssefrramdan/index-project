@@ -5,9 +5,8 @@ import {
   deleteSubCategory,
   getAllSubCategories,
   getSpecificSubCategory,
-  setCategoryIdToBody,
+  // setCategoryIdToBody,
   updateSubCategory,
-  validateCategory,
 } from "../services/subCategory.controller.js";
 import {
   addSubCategoryValidator,
@@ -21,8 +20,7 @@ const subCategoriesRouter = express.Router({ mergeParams: true });
 subCategoriesRouter
   .route("/")
   .post(
-    setCategoryIdToBody,
-    validateCategory,
+    // setCategoryIdToBody,
     addSubCategoryValidator,
     addSubCategory
   )
