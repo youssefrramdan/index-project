@@ -4,7 +4,9 @@ import {
   deleteBrand,
   getAllBrands,
   getSpecificBrand,
+  resizeBrandImage,
   updateBrand,
+  uploadBrandImage,
 } from "../services/brands.controller.js";
 import {
   createBrandValidator,
@@ -12,9 +14,10 @@ import {
   getSpecificBrandValidator,
   updateBrandValidator,
 } from "../utils/validators/brandValidator.js";
+import uploadSingleImageCloud from "../middlewares/uploadImageMiddlewareForCloudneriy.js";
 
 const brandRouter = express.Router();
-brandRouter.route("/").get(getAllBrands).post(createBrandValidator, addBrand);
+brandRouter.route("/").get(getAllBrands).post(uploadBrandImage,resizeBrandImage,createBrandValidator, addBrand);
 brandRouter.route("/:id")
   .get(getSpecificBrandValidator, getSpecificBrand)
   .put(updateBrandValidator, updateBrand)

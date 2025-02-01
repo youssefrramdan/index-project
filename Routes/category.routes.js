@@ -1,10 +1,14 @@
 import express from "express";
+// eslint-disable-next-line import/no-extraneous-dependencies
+import subCategoriesRouter from "./subCategory.routes.js";
 import {
   addCategory,
   getAllCategories,
   getSpecificCategory,
   updateCategory,
   deleteCategory,
+  uploadCategoryImage,
+  resizeCategoryImage,
 } from "../services/category.controller.js";
 import {
   createCategoryValidator,
@@ -12,14 +16,14 @@ import {
   getSpecificCategoryValidator,
   updateCategoryValidator,
 } from "../utils/validators/categoryValidator.js";
-import subCategoriesRouter from "./subCategory.routes.js";
+
 
 const categoryRouter = express.Router();
 categoryRouter.use("/:categoryId/subcategories", subCategoriesRouter);
 categoryRouter
   .route("/")
   .get(getAllCategories)
-  .post(createCategoryValidator, addCategory);
+  .post(uploadCategoryImage, resizeCategoryImage, createCategoryValidator, addCategory);
 categoryRouter
   .route("/:id")
   .get(getSpecificCategoryValidator, getSpecificCategory)
@@ -27,6 +31,12 @@ categoryRouter
   .delete(deleteCategoryValidator, deleteCategory);
 export default categoryRouter;
 
+ // upload.single("image"),
+    // (req, res, next) => {
+    //   console.log(req.file);
+    //   next();
+    // },
+// -----------------------------------------------------------
 // .get(
 //   // 1- rules
 //   param("id").isMongoId().withMessage("invalid category id"),

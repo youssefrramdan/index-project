@@ -1,3 +1,4 @@
+import path from "path";
 import express from "express";
 import dotenv from "dotenv";
 import morgan from "morgan";
@@ -9,6 +10,10 @@ import subCategoriesRouter from "./Routes/subCategory.routes.js";
 import brandRouter from "./Routes/brand.routes.js";
 import productRouter from "./Routes/product.routes.js";
 
+import { fileURLToPath } from 'url';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 dotenv.config({ path: "./config.env" });
 
 //db connection
@@ -19,6 +24,7 @@ const app = express();
 
 // middlewares
 app.use(express.json());
+app.use(express.static(path.join(__dirname, "uploads"))); // __dirname is now available via the method below
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
   console.log(`mode : ${process.env.NODE_ENV}`);

@@ -1,5 +1,36 @@
+/* eslint-disable import/no-extraneous-dependencies */
+import { v4 as uuid4 } from "uuid";
+import sharp from "sharp";
 import CategoryModel from "../models/Category.model.js";
-import { createOne, deleteOne, getAll, getOne, updateOne } from "./handlersFactory.js";
+import {
+  createOne,
+  deleteOne,
+  getAll,
+  getOne,
+  updateOne,
+} from "./handlersFactory.js";
+// eslint-disable-next-line import/order
+import asyncHandler from "express-async-handler";
+import uploadSingleImage from "../middlewares/uploadImageMiddleware.js";
+import { ApiError } from "../utils/apiError.js";
+
+// image processing
+const resizeCategoryImage = asyncHandler(async (req, res, next) => {
+  if (!req.file) {
+    return next(new ApiError("No image provided", 400));
+  }
+  const filename = `category-${uuid4()}-${Date.now()}.jpeg`;
+  await sharp(req.file.buffer)
+    .resize(600, 600)
+    .toFormat("jpeg")
+    .jpeg({ quality: 90 })
+    .toFile(`uploads/categories/${filename}`);
+  //save image into database
+  req.body.image = filename;
+  next();
+});
+
+const uploadCategoryImage = uploadSingleImage("image");
 
 // @desc     Create category
 // @route    POST /api/v1/categories
@@ -11,13 +42,13 @@ const addCategory = createOne(CategoryModel);
 // @route    Get /api/v1/categories
 // @access   Public
 
-const getAllCategories = getAll(CategoryModel)
+const getAllCategories = getAll(CategoryModel);
 
 // @desc     Get Specific Category by id
 // @route    GET /api/v1/categories/:id
 // @access   Public
 
-const getSpecificCategory = getOne(CategoryModel)
+const getSpecificCategory = getOne(CategoryModel);
 
 // @desc     Update Specific Category By id
 // @route    PUT /api/v1/categories/id
@@ -36,6 +67,8 @@ export {
   getSpecificCategory,
   updateCategory,
   deleteCategory,
+  uploadCategoryImage,
+  resizeCategoryImage,
 };
 
 //  ! express-async-handler
@@ -92,3 +125,38 @@ export {
 // It's particularly useful when implementing pagination to divide data into pages.
 
 // --------------------------------------------------------------------------------------------------------
+
+// import multer from "multer";
+// import sharp from "sharp";
+
+// ✅ Use Memory Storage because sharp processes images in memory
+// const storage = multer.memoryStorage();
+
+// ⚡ Multer setup using Memory Storage
+// const upload = multer({
+//     storage: storage, // ✅ Store files in memory instead of disk
+//     fileFilter: fileFilter, // 🎯 Apply filtering to accept only images
+// });
+
+// 📌 Middleware to process the image using Sharp
+// const processImage = async (req, res, next) => {
+//     if (!req.file) return next(); // ✅ Skip processing if no file is uploaded
+
+//     try {
+// 🖼️ Process the image and convert it to JPEG
+//         req.file.buffer = await sharp(req.file.buffer)
+//             .resize(500, 500) // 🔄 Resize image to 500x500 pixels
+//             .toFormat("jpeg") // 📷 Convert image to JPEG format
+//             .jpeg({ quality: 80 }) // 🎚️ Set JPEG quality to 80%
+//             .toBuffer(); // 🔄 Convert the processed image back to a Buffer
+
+//         next(); // ✅ Proceed to the next middleware after processing
+//     } catch (error) {
+//         next(error); // ❌ Pass the error to the error-handling middleware
+//     }
+// };
+
+// 📥 Middleware to upload and process a single image
+// const uploadSingleImage = upload.single("image");
+
+// export { uploadSingleImage, processImage };

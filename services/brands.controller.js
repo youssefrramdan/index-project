@@ -1,56 +1,67 @@
+import { v4 as uuid4 } from "uuid";
+import sharp from "sharp";
+import { Readable } from "stream";
+import { v2 as cloudinary } from "cloudinary";
 import asyncHandler from "express-async-handler";
 import { ApiError } from "../utils/apiError.js";
 import BrandModel from "../models/brand.model.js";
-import ApiFeatures from "../utils/DummyData/apiFeatures.js";
-import { createOne, deleteOne, updateOne } from "./handlersFactory.js";
+import {
+  createOne,
+  deleteOne,
+  getAll,
+  getOne,
+  updateOne,
+} from "./handlersFactory.js";
+import uploadSingleImage from "../middlewares/uploadImageMiddleware.js";
+
+const resizeBrandImage = asyncHandler(async (req, res, next) => {
+  if (!req.file) {
+    return next(new ApiError("No image provided", 400));
+  }
+
+  const filename = `brand-${uuid4()}-${Date.now()}.jpeg`;
+
+  const processedImage = await sharp(req.file.buffer)
+    .resize(600, 600)
+    .toFormat("jpeg")
+    .jpeg({ quality: 90 })
+    .toBuffer();
+
+  const stream = cloudinary.uploader.upload_stream(
+    { folder: "brands", public_id: filename },
+    (error, result) => {
+      if (error) {
+        return next(new ApiError("Failed to upload to Cloudinary", 500));
+      }
+      req.body.image = result.secure_url;
+      next();
+    }
+  );
+
+  Readable.from(processedImage).pipe(stream);
+});
+const uploadBrandImage = uploadSingleImage("image", "brands");
+
+// const uploadBrandImage = uploadSingleImage("image");
 
 // @desc     Create brand
 // @route    POST /api/v1/brands
 // @access   Private
-const addBrand = createOne(BrandModel);
+const addBrand = asyncHandler(async (req, res) => {
+  console.log("Uploaded File:", req.file); // ✅ تأكد أن الصورة تُرفع إلى Cloudinary
+  const brand = await BrandModel.create(req.body);
+  res.status(201).json({ message: "Success", data: brand });
+});
 
 // @desc     Get list of brands
 // @route    GET /api/v1/brands
 // @access   Public
-const getAllBrands = asyncHandler(async (req, res) => {
-  const documentCount = await BrandModel.countDocuments();
-  const Features = new ApiFeatures(BrandModel.find(), req.query)
-    .filter()
-    .search("Brands")
-    .sort()
-    .limitFields()
-    .paginate(documentCount);
-
-  const { mongooseQuery, paginationResult } = Features;
-  const result = await mongooseQuery;
-
-  res.status(200).json({
-    message: "Success",
-    paginationResult,
-    result: result.length,
-    data: result,
-  });
-});
+const getAllBrands = getAll(BrandModel);
 
 // @desc     Get Specific brand by id
 // @route    GET /api/v1/brands/:id
 // @access   Public
-const getSpecificBrand = asyncHandler(async (req, res, next) => {
-  const { id } = req.validData;
-  if (!id) {
-    return next(new ApiError("Brand ID is required", 400));
-  }
-
-  const brand = await BrandModel.findById(id);
-  if (!brand) {
-    return next(new ApiError(`No brand found with ID ${id}`, 404));
-  }
-
-  res.status(200).json({
-    message: "Success",
-    data: brand,
-  });
-});
+const getSpecificBrand = getOne(BrandModel);
 
 // @desc     Update Specific brand by id
 // @route    PUT /api/v1/brands/:id
@@ -61,4 +72,12 @@ const updateBrand = updateOne(BrandModel);
 // @access   Private
 const deleteBrand = deleteOne(BrandModel);
 
-export { addBrand, getAllBrands, getSpecificBrand, updateBrand, deleteBrand };
+export {
+  addBrand,
+  getAllBrands,
+  getSpecificBrand,
+  updateBrand,
+  deleteBrand,
+  resizeBrandImage,
+  uploadBrandImage,
+};
