@@ -1,6 +1,6 @@
 import { check } from "express-validator";
+import slugify from "slugify";
 import validatorMiddleware from "../../middlewares/validatorMiddleware.js";
-// @desc array of rules for
 
 export const createCategoryValidator = [
   check("name")
@@ -9,7 +9,11 @@ export const createCategoryValidator = [
     .isLength({ min: 3 })
     .withMessage("Too short category name")
     .isLength({ max: 32 })
-    .withMessage("Too long category name"),
+    .withMessage("Too long category name")
+    .custom((value, { req }) => {
+      req.body.slug = slugify(value);
+      return true;
+    }),
   validatorMiddleware,
 ];
 // dry => dont repeat your self
@@ -19,6 +23,10 @@ export const getSpecificCategoryValidator = [
 ];
 export const updateCategoryValidator = [
   check("id").isMongoId().withMessage("Invalid Category Id Format"),
+  check("name").custom((value, { req }) => {
+    req.body.slug = slugify(value);
+    return true;
+  }),
   validatorMiddleware,
 ];
 

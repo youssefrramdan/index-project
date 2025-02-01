@@ -1,4 +1,4 @@
-import { body, check } from "express-validator";
+import {check } from "express-validator";
 import mongoose from "mongoose";
 import slugify from "slugify";
 import validatorMiddleware from "../../middlewares/validatorMiddleware.js";

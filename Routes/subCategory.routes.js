@@ -1,7 +1,7 @@
 import express from "express";
 import {
   addSubCategory,
-  createFilterObj,
+  // createFilterObj,
   deleteSubCategory,
   getAllSubCategories,
   getSpecificSubCategory,
@@ -24,7 +24,7 @@ subCategoriesRouter
     addSubCategoryValidator,
     addSubCategory
   )
-  .get(createFilterObj, getAllSubCategories);
+  .get(getAllSubCategories);
 subCategoriesRouter
   .route("/:id")
   .get(getSpecificSubCategoryValidator, getSpecificSubCategory)
