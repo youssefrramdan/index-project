@@ -72,6 +72,14 @@ const productSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+// mongoose query middleware
+productSchema.pre(/^find/, function (next) {
+  this.populate({
+    path: "category",
+    select: "name",
+  });
+  next();
+});
 const ProductModel = mongoose.model("Product", productSchema);
 
 export default ProductModel;
